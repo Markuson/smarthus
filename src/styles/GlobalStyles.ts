@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     width: wp('100%'),
-    paddingTop: wp('5%'),
   },
 
   container: {

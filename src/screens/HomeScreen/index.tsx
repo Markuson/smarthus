@@ -1,12 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {
-  ImageBackground,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-  Vibration,
-} from 'react-native';
+import React, {useState} from 'react';
+import {RefreshControl, ScrollView, View, Vibration} from 'react-native';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/config/store';
 import GlobalStyles from '../../styles/GlobalStyles';
@@ -15,24 +8,14 @@ import TempCard from '../../components/molecules/Cards/Temperature';
 import WeatherCard from '../../components/molecules/Cards/Weather';
 import LightCard from '../../components/molecules/Cards/Light';
 import prompt from 'react-native-prompt-android';
-import Timestamp from '../../components/atoms/Timestamp';
 import {deviceType} from '../../types/devices';
-import {MQTTpublish} from '../../mqtt/client';
-interface Props {
-  onError: (error: string) => void;
-}
+import {MQTTpublish, MQTTupdate} from '../../mqtt/client';
+interface Props {}
 
-function HomeScreen({onError}: Props) {
+function HomeScreen({}: Props) {
   const devices = useSelector((state: RootState) => state.data.devices);
-  const timestamp = useSelector((state: RootState) => state.data.timestamp);
   //   const notAtHome = useSelector((state: RootState) => state.notAtHome);
-  //   const timestamp = useSelector((state: RootState) => state.timestamp);
 
-  //   useEffect(() => {
-  //     if (refreshing) {
-  //       setRefreshing(false);
-  //     }
-  //   }, [data]);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRename = (name: string, label: string) => {
@@ -46,7 +29,7 @@ function HomeScreen({onError}: Props) {
           text: 'OK',
           onPress: (_label: string) => {
             if (_label && _label !== '') {
-              MQTTpublish('rename', name, {label: _label}, onError);
+              MQTTpublish('rename', name, {label: _label});
             }
           },
         },
@@ -67,14 +50,16 @@ function HomeScreen({onError}: Props) {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() =>
-              MQTTpublish('retrieve', undefined, undefined, onError)
-            }
+            onRefresh={async () => {
+              setRefreshing(true);
+              await MQTTupdate();
+              setRefreshing(false);
+            }}
           />
         }>
         {devices.length ? (
           <View style={GlobalStyles.appContainer}>
-            <Timestamp time={timestamp} />
+            {/* <Timestamp time={timestamp} /> */}
             <View style={GlobalStyles.homeContainer}>
               {devices.map((device: deviceType, index: any) => {
                 if (device.name.includes('llum')) {
@@ -87,16 +72,25 @@ function HomeScreen({onError}: Props) {
                       }
                       onRename={() => handleRename(device.name, device.label)}
                       onSwitch={() =>
-                        MQTTpublish(
-                          'set',
-                          device.name,
-                          {
-                            state: device.data.state === 'ON' ? 'OFF' : 'ON',
-                          },
-                          onError,
-                        )
+                        MQTTpublish('set', device.name, {
+                          state: device.data.state === 'ON' ? 'OFF' : 'ON',
+                        })
                       }
-                      status={device.data.state === 'ON' && true}
+                      data={device.data}
+                      features={device.features}
+                      onBrightnessChange={value =>
+                        MQTTpublish('set', device.name, {
+                          brightness: value,
+                        })
+                      }
+                      oncolorTempChange={value =>
+                        MQTTpublish('set', device.name, {
+                          color_temp: value,
+                        })
+                      }
+                      onColorChange={(x, y) =>
+                        console.log('COLOR: ', `x: ${x}, y: ${y}`)
+                      }
                     />
                   );
                 }

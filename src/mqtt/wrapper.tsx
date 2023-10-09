@@ -2,16 +2,14 @@
 import React, {useRef, useEffect, useState} from 'react';
 import {Alert, AppState, View} from 'react-native';
 import {addEventListener as networkListener} from '@react-native-community/netinfo';
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch} from 'react-redux';
 // import {RootSiblingParent} from 'react-native-root-siblings';
-import Toast from 'react-native-root-toast';
-import {RootState} from '../redux/config/store';
 import {ConnectionState} from '@aws-amplify/pubsub';
 import LocationPermission from '../utils/Permisions';
 import {mqttResData} from '../types/mqtt';
 import {MQTTinit, MQTTsubscribe, MQTTupdate} from './client';
 import {usePrevious} from '../hooks/usePrevious';
-import { devicesSlice, setDevicesList } from '../redux/slices/devicesSlice';
+import {setDevicesList} from '../redux/slices/devicesSlice';
 
 interface Props {
   children: JSX.Element;
@@ -37,23 +35,21 @@ function MQTTWraper({children}: Props) {
         );
       }
       console.log('INIT MQTT');
-      await MQTTinit(mqttError);
-      await MQTTsubscribe(mqttMessage, connectionListener, mqttError);
-      await MQTTupdate(mqttError);
+      await MQTTinit();
+      await MQTTsubscribe(mqttMessage, connectionListener);
+      await MQTTupdate();
     })();
   }, []);
 
   useEffect(() => {
-    console.log('PREV CONNECTION STATE IS: ', prevConnectionState)
+    console.log('PREV CONNECTION STATE IS: ', prevConnectionState);
     if (
       connectionState === ConnectionState.Disconnected &&
       prevConnectionState !== undefined &&
       prevConnectionState !== connectionState
     ) {
       console.log('SUBSCRIBE AGAIN');
-      MQTTsubscribe(mqttMessage, connectionListener, mqttError).then(() =>
-        MQTTupdate(mqttError),
-      );
+      MQTTsubscribe(mqttMessage, connectionListener).then(MQTTupdate);
     }
   }, [connectionState]);
 
@@ -77,17 +73,6 @@ function MQTTWraper({children}: Props) {
   //     });
   //   }
   // };
-
-  const mqttError = (message: string) => {
-    console.error(message);
-    Toast.show(message, {
-      duration: Toast.durations.SHORT,
-      position: -80,
-      shadow: true,
-      animation: true,
-      hideOnPress: true,
-    });
-  };
 
   const mqttMessage = (message: mqttResData) => {
     dispatch(setDevicesList(message));

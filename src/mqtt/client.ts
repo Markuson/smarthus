@@ -12,8 +12,9 @@ import {
   USER_POOLS_WEB_CLIENT_ID,
 } from '@env';
 import {mqttAction, mqttReqData} from '../types/mqtt';
+import Toast from 'react-native-root-toast';
 
-export async function MQTTinit(onError: (error: string) => void) {
+export async function MQTTinit() {
   try {
     Amplify.configure({
       aws_project_region: AWS_REGION,
@@ -29,7 +30,7 @@ export async function MQTTinit(onError: (error: string) => void) {
       }),
     );
   } catch (error: any) {
-    onError(error);
+    MQTTerror(error);
   }
 }
 
@@ -37,7 +38,6 @@ export async function MQTTpublish(
   action: mqttAction,
   name: string | undefined,
   data: mqttReqData | undefined,
-  onError: (error: any) => void,
 ) {
   try {
     await PubSub.publish('smarthusIn', {
@@ -46,21 +46,20 @@ export async function MQTTpublish(
       data,
     });
   } catch (error: any) {
-    onError(error);
+    MQTTerror(error);
   }
 }
 
 export async function MQTTsubscribe(
   onMessage: (message: any) => void,
   onConnectionChange: (connectionState: ConnectionState) => void,
-  onError: (error: any) => void,
 ) {
   try {
     PubSub.subscribe('smarthusOut').subscribe({
       next: data => {
         onMessage(data.value);
       },
-      error: error => onError(error.error),
+      error: error => MQTTerror(error.error),
       complete: () => console.log('Topic smarthusOut CLOSED'),
     });
     Hub.listen('pubsub', (data: any) => {
@@ -71,14 +70,25 @@ export async function MQTTsubscribe(
       }
     });
   } catch (error: any) {
-    onError(error);
+    MQTTerror(error);
   }
 }
 
-export async function MQTTupdate(onError: (error: any) => void) {
+export async function MQTTupdate() {
   try {
-    MQTTpublish('retrieve', undefined, onError);
+    await MQTTpublish('retrieve', undefined, undefined);
   } catch (error: any) {
-    onError(error);
+    MQTTerror(error);
   }
 }
+
+export function MQTTerror(message: string) {
+  console.error(message);
+  Toast.show(message, {
+    duration: Toast.durations.SHORT,
+    position: -80,
+    shadow: true,
+    animation: true,
+    hideOnPress: true,
+  });
+};

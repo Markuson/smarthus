@@ -1,15 +1,14 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {mqttResData} from '../../types/mqtt';
 import {deviceType, groupType} from '../../types/devices';
-import {RootState} from '../config/store';
 
-const initialState = {devices: [], groups: [], timestamp: ''};
+const initialState: mqttResData = {devices: [], groups: [], timestamp: ''};
 
 export const devicesSlice = createSlice({
   name: 'data',
   initialState,
   reducers: {
-    setDevicesList: (state: RootState, action: PayloadAction<mqttResData>) => {
+    setDevicesList: (state, action: PayloadAction<mqttResData>) => {
       action.payload.devices.forEach((device: deviceType) => {
         const deviceIndex = state.devices.findIndex(
           (_device: deviceType) => _device.name === device.name,
@@ -32,6 +31,7 @@ export const devicesSlice = createSlice({
               ...group,
             });
       });
+      state.timestamp = action.payload.timestamp;
     },
   },
 });

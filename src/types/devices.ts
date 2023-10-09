@@ -16,7 +16,7 @@ export type deviceScheduleType = {
 }
 export type deviceProperty =
   | 'state'
-  | 'brightnes'
+  | 'brightness'
   | 'color_temp'
   | 'color'
   | 'color_xy';
@@ -28,41 +28,47 @@ export type deviceLogs = {
   plog?: number[];
 };
 
+export type deviceDataType = {
+  state: 'ON' | 'OFF';
+  linkquality: number;
+  brightness: number;
+  color?: {
+    hue: number;
+    saturation: number;
+    x: 0.4967;
+    y: number;
+  };
+  color_mode?: string;
+  color_temp?: number;
+  power_on_behavior?: string;
+  temperature?: number;
+  humidity?: number;
+  pressure?: number;
+  logs?: deviceLogs;
+  battery?: number;
+};
+
+export type deviceFeaturesType = {
+  access: number;
+  description: string;
+  name: deviceProperty;
+  property: deviceProperty;
+  type: 'binary' | 'numeric';
+  value_off?: 'OFF';
+  value_on?: 'ON';
+  value_toggle?: 'TOGGLE';
+  value_max?: number;
+  value_min?: number;
+  presets?: genericObject[];
+  features?: genericObject[];
+}[];
+
 export type deviceType = {
   name: string;
   label: string;
   ieee_address: string;
-  features: {
-    access: number;
-    description: string;
-    name: deviceProperty;
-    property: deviceProperty;
-    type: 'binary' | 'numeric';
-    value_off?: 'OFF';
-    value_on?: 'ON';
-    value_toggle?: 'TOGGLE';
-    value_max?: number;
-    value_min?: number;
-    presets?: genericObject[];
-    features?: genericObject[];
-  }[];
-  data: {
-    state: 'ON' | 'OFF';
-    linkquality: number;
-    color?: {
-      hue: number;
-      saturation: number;
-      x: 0.4967;
-      y: number;
-    };
-    color_mode?: string;
-    color_temp?: number;
-    power_on_behavior?: string;
-    temperature?: number;
-    humidity?: number;
-    pressure?: number;
-    logs?: deviceLogs;
-  };
+  features: deviceFeaturesType;
+  data: deviceDataType;
 };
 export type devicesList = deviceType[];
 

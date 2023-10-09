@@ -10,12 +10,13 @@ export default {
   color:
     theme === 'dark'
       ? {
-          button: 'rgb(64,64,64)',
+          button: 'slategray',
           background: 'rgba(24,24,24, 0.8)',
           border: 'darkslategray',
           card: 'rgb(64,64,64)',
           icon: {
             disabled: 'lightgray',
+            unavailable: '#666666',
             enabled: '#ffef96',
           },
           notification: 'red',
@@ -37,7 +38,8 @@ export default {
           border: 'lightgray',
           card: 'snow',
           icon: {
-            disabled: 'gray',
+            disabled: 'lightgray',
+            unavailable: '666666',
             enabled: '#ffef96',
           },
           notification: 'tomato',
@@ -59,9 +61,9 @@ export default {
     fullWidth: wp('100%'),
     fullHeigth: hp('100%'),
     switchButton: {
-      height: wp('22%'),
-      width: wp('90%'),
-      radius: hp('0.5%'),
+      height: wp('7%'),
+      width: wp('7%'),
+      radius: wp('7%'),
     },
     tradSettingsButton: {
       height: hp('6%'),
@@ -102,7 +104,7 @@ export default {
   },
   icon: {
     size: {
-      normal: hp('3%'),
+      normal: hp('3.5%'),
       small: hp('2%'),
       big: hp('6%'),
     },
